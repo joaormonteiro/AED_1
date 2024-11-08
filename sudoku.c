@@ -116,5 +116,3 @@ int main()
 
     verif(sdk, n);
 }
-
-// oi teste
