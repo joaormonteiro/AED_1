@@ -39,8 +39,6 @@ void danca(char v[])
 int main()
 {
     char frase[MAX];
-
-    while (fgets(frase, sizeof(frase), stdin)) {
-        danca(frase); 
-    }
+    fgets(frase, sizeof(frase), stdin);
+    danca(frase);
 }
