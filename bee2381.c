@@ -2,38 +2,101 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Função de comparação para qsort
-int comparar(const void *a, const void *b) {
-    return strcmp(*(const char **)a, *(const char **)b);
+#define MAX_NOME 30
+
+typedef struct No
+{
+    char nome[MAX_NOME];
+    struct No *proximo;
+} No;
+
+void inserir(No **cabeca, char nome[MAX_NOME])
+{
+    No *novo_no = (No *)malloc(sizeof(No));
+    strcpy(novo_no->nome, nome);
+    novo_no->proximo = NULL;
+
+    if (*cabeca == NULL)
+    {
+        *cabeca = novo_no;
+    }
+    else
+    {
+        No *atual = *cabeca;
+        while (atual->proximo != NULL)
+        {
+            atual = atual->proximo;
+        }
+        atual->proximo = novo_no;
+    }
 }
 
-int main() {
+void acessar_aluno(No *cabeca, int k)
+{
+    int count = 1;
+    No *atual = cabeca;
+
+    while (atual != NULL)
+    {
+        if (count == k)
+        {
+            printf("%s\n", atual->nome);
+            return;
+        }
+        count++;
+        atual = atual->proximo;
+    }
+}
+
+void ordenar(No *cabeca)
+{
+    if (cabeca == NULL)
+        return;
+
+    int trocado;
+    No *atual;
+    No *ultimo = NULL;
+
+    do
+    {
+        trocado = 0;
+        atual = cabeca;
+
+        while (atual->proximo != ultimo)
+        {
+            if (strcmp(atual->nome, atual->proximo->nome) > 0)
+            {
+                char temp[MAX_NOME];
+                strcpy(temp, atual->nome);
+                strcpy(atual->nome, atual->proximo->nome);
+                strcpy(atual->proximo->nome, temp);
+
+                trocado = 1;
+            }
+            atual = atual->proximo;
+        }
+
+    } while (trocado);
+}
+
+int main(void) {
     int n, k;
+
+    No*cabeca = NULL;
+
     scanf("%d %d", &n, &k);
 
-    // Aloca espaço para ponteiros de nomes
-    char *nomes[n];
-
-    // Lê os nomes e aloca memória dinamicamente
-    for (int i = 0; i < n; i++) {
-        nomes[i] = (char *)malloc(21 * sizeof(char)); // Máximo de 20 caracteres + '\0'
-        if (nomes[i] == NULL) {
-            fprintf(stderr, "Erro ao alocar memória\n");
-            return 1;
-        }
-        scanf("%s", nomes[i]);
+    for (int i = 0 ; i < n; i++)
+    {
+        char nome[MAX_NOME];
+        scanf("%s", nome);
+        inserir(&cabeca, nome);
     }
+    
+    ordenar(cabeca);
 
-    // Ordena os nomes em ordem alfabética
-    qsort(nomes, n, sizeof(char *), comparar);
-
-    // Imprime o K-ésimo nome (índice K-1 porque arrays são 0-indexados)
-    printf("%s\n", nomes[k - 1]);
-
-    // Libera a memória alocada
-    for (int i = 0; i < n; i++) {
-        free(nomes[i]);
-    }
+    acessar_aluno(cabeca, k);
 
     return 0;
+
 }
