@@ -1,92 +1,131 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-#define MAX_VERTICES 26
+typedef char vertex;
 
-// Estrutura para o grafo
-typedef struct {
-    int adj[MAX_VERTICES][MAX_VERTICES]; // Matriz de adjacência
-    int visited[MAX_VERTICES];          // Vértices visitados
-    int vertices;                       // Número de vértices
-} Graph;
+typedef struct graph {
+  int V;
+  int A;
+  int **adj;
+} *Graph;
 
-// Inicializa o grafo
-void initGraph(Graph *g, int vertices) {
-    g->vertices = vertices;
-    memset(g->adj, 0, sizeof(g->adj));
-    memset(g->visited, 0, sizeof(g->visited));
+typedef struct union_find {
+  int V;
+  int c;
+  int *dir;
+} *UnionFind;
+
+UnionFind initUnionFind(int V) {
+  UnionFind UF = malloc(sizeof(*UF));
+
+  UF->V = V;
+  UF->c = V;
+  UF->dir = malloc(V * sizeof(int));
+  
+  for (int v = 0; v < V; v++) {
+    UF->dir[v] = v;
+  }
+
+  return UF;
 }
 
-// Adiciona uma aresta ao grafo
-void addEdge(Graph *g, int u, int v) {
-    g->adj[u][v] = 1;
-    g->adj[v][u] = 1;
+Graph initGraph(int V) {
+  Graph G = malloc(sizeof(*G));
+  G->V = V;
+  G->A = 0;
+  G->adj = malloc(V * sizeof(int *));
+  for (int i =0; i < V; i++) {
+    G->adj[i] = calloc(V, sizeof(int));
+  }
+
+  return G;
 }
 
-// Realiza a busca em profundidade
-void dfs(Graph *g, int vertex, char *component) {
-    g->visited[vertex] = 1;
-    // Adiciona o vértice ao componente atual
-    char currentVertex = 'a' + vertex;
-    strncat(component, &currentVertex, 1);
-    strcat(component, ",");
+void insertArc(Graph G, vertex v, vertex w) {
+  int index_v, index_w;
+  index_v = v - 'a';
+  index_w = w - 'a';
 
-    for (int i = 0; i < g->vertices; i++) {
-        if (g->adj[vertex][i] && !g->visited[i]) {
-            dfs(g, i, component);
+  G->A++;
+  G->adj[index_v][index_w] = 1;
+  G->adj[index_w][index_v] = 1;
+}
+
+int Find(UnionFind UF, int v) {
+  return UF->dir[v];
+}
+
+void Union(UnionFind UF, int r, int s) {
+  for (int v = 0; v < UF->V; v++) {
+    if (UF->dir[v] == r)
+      UF->dir[v] = s;
+  }
+}
+
+UnionFind Componentes(Graph G) {
+  int v, w, r, s;
+  UnionFind UF = initUnionFind(G->V);
+
+  for (v = 0; v < G->V; v++) {
+    for (w = 0; w < G->V; w++) {
+      if (G->adj[v][w] == 1) {
+        r = Find(UF, v);
+        s = Find(UF, w);
+        if (r != s) {
+          Union(UF, r, s);
+          UF->c--;
         }
+      }
     }
+  }
+
+  return UF;
 }
 
-int main() {
-    int testCases;
-    scanf("%d", &testCases);
+void printComponentes(UnionFind UF) {
+    int V = UF->V;
+    int *printed = calloc(V, sizeof(int));
 
-    for (int t = 1; t <= testCases; t++) {
-        int V, E;
-        scanf("%d %d", &V, &E);
-
-        Graph g;
-        initGraph(&g, V);
-
-        for (int i = 0; i < E; i++) {
-            char u, v;
-            scanf(" %c %c", &u, &v);
-            addEdge(&g, u - 'a', v - 'a');
-        }
-
-        printf("Case #%d:\n", t);
-
-        int connectedComponents = 0;
-
-        for (int i = 0; i < V; i++) {
-            if (!g.visited[i]) {
-                char component[100] = "";
-                dfs(&g, i, component);
-                // Ordena os caracteres no componente
-                int length = strlen(component);
-                char nodes[MAX_VERTICES];
-                int index = 0;
-                for (int j = 0; j < length; j++) {
-                    if (component[j] != ',') {
-                        nodes[index++] = component[j];
-                    }
+    for (int i = 0; i < V; i++) {
+        int lider = Find(UF, i);
+        if (!printed[lider]) {
+            for (int j = 0; j < V; j++) {
+                if (Find(UF, j) == lider) {
+                    printf("%c,", j + 'a');
                 }
-                nodes[index] = '\0';
-                qsort(nodes, index, sizeof(char), (int (*)(const void *, const void *))strcmp);
-
-                for (int j = 0; j < index; j++) {
-                    printf("%c,", nodes[j]);
-                }
-                printf("\n");
-
-                connectedComponents++;
             }
+            printf("\n");
+            printed[lider] = 1;
         }
-
-        printf("%d connected components\n\n", connectedComponents);
     }
 
-    return 0;
+    free(printed);
+}
+
+int main () {
+  Graph G;
+  UnionFind UF;
+  int n, a, N, V, A;
+  vertex v, w;
+
+  scanf("%d", &N);
+
+  for (n = 1; n <= N; n++) {
+    scanf("%d %d", &V, &A);
+
+    G = initGraph(V);
+
+    for (a = 0; a < A; a++) {
+      getchar();
+      scanf("%c %c", &v, &w);
+
+      insertArc(G, v, w);
+    }
+
+    UF = Componentes(G);
+
+    printf("Case #%d:\n", n);
+    printComponentes(UF);
+    printf("%d connected components\n\n", UF->c);
+  }
 }
