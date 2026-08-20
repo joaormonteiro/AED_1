@@ -84,7 +84,6 @@ int verif(int v[][9][9], int n) {
 
 int main() {
     int n;
-    printf("Digite o número de instâncias de Sudoku: ");
     scanf("%d", &n);
 
     int sdk[n][9][9];
