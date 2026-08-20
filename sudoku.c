@@ -2,7 +2,7 @@
 Disciplina  : Algortimo e Estrutura de Dados 2026S1
 Nome        : João Rubens Rezende Monteiro
 Linguagem   : C
-Problema    : Maratona de Programação IME-USP - Sudoku
+Problema    : Maratona de Programação IME-USP - Sudoku 1383
 Data        : 20/08/2026
 Objetivo    : Verificar se uma matriz 9x9 preenchida é solução válida de
 Sudoku (cada linha, coluna e quadrante 3x3 deve conter os números de 1 a 9).
